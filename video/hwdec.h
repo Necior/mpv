@@ -22,6 +22,7 @@ struct mp_hwdec_ctx {
 
     // API-specific, not needed by all backends.
     struct mp_vdpau_ctx *vdpau_ctx;
+    struct mp_vda_ctx *vda_ctx;
     struct mp_vaapi_ctx *vaapi_ctx;
 
     // Optional.

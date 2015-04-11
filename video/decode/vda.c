@@ -20,10 +20,13 @@
 #include <libavcodec/version.h>
 #include <libavcodec/vda.h>
 
+#include <libavutil/opt.h>
+
 #include "common/av_common.h"
 #include "common/msg.h"
 #include "video/mp_image.h"
 #include "video/decode/lavc.h"
+#include "video/vda.h"
 #include "config.h"
 
 
@@ -76,7 +79,15 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
 static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 {
     av_vda_default_free(ctx->avctx);
+#if HAVE_VDA_DEFAULT_INIT2
+    AVVDAContext *vdactx = av_vda_alloc_context();
+    uint32_t cvpixfmt = ctx->hwdec_info->hwctx->vda_ctx->cvpixfmt;
+    av_opt_set_int(vdactx, "cv_pix_fmt_type", cvpixfmt, 0);
+    int err = av_vda_default_init2(ctx->avctx, vdactx);
+#else
     int err = av_vda_default_init(ctx->avctx);
+#endif
+
     if (err < 0) {
         print_vda_error(ctx->log, MSGL_ERR, "failed to init VDA decoder", err);
         return -1;
